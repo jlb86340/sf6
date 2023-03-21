@@ -17,24 +17,27 @@ class FilmType extends AbstractType
     {
         $builder
             ->add('titre',
-                TextType::class, //déduit automatiquement par symfony
+                TextType::class,       // déduit automatiquement par Symfony
                 [
                     'label' => 'titre du film',
                     'attr' => ['placeholder' => 'titre'],
                 ])
             ->add('annee',
-                IntegerType::class, // déduit automatiquement par Symfony
-                ['label'=>'année de sortie'])
+                IntegerType::class,    // déduit automatiquement par Symfony
+                ['label' => 'année de sortie'])
             ->add('enstock',
-                ChoiceType::class, // par défaut c'est CheckboxType
+                ChoiceType::class,     // par défaut c'est CheckboxType
                 [
                     'label' => 'en stock',
-                    'choices' => ['oui' => true, 'non' => false],  // liste des choix : labels et valeurs
-                    'expanded' => true,                            // liste déroulante ou radio-boutons
+                    'choices' => ['oui' => true, 'non' => false],     // liste des choix : labels et valeurs
+                    'expanded' => true,                               // liste déroulante ou radio-boutons
                 ])
             ->add('prix',
                 NumberType::class,     // déduit automatiquement par Symfony
-                ['label' => 'prix d\'achat'])
+                [
+                    'label' => 'prix d\'achat',
+                    'invalid_message' => 'le prix n\'est pas un nombre',
+                ])
             ->add('quantite',
                 IntegerType::class,    // déduit automatiquement par Symfony
                 [

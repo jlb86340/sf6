@@ -71,4 +71,3 @@ class FormController extends AbstractController
         return $this->render('Sandbox/Form/film_editbis.html.twig', $args);
     }
 }
-

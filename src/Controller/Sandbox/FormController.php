@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/sandbox/form', name: 'sandbox_form')]
 class FormController extends AbstractController
@@ -69,5 +70,20 @@ class FormController extends AbstractController
             'myform' => $form->createView(),
         );
         return $this->render('Sandbox/Form/film_editbis.html.twig', $args);
+    }
+
+    #[Route('/film/validator', name: '_film_validator')]
+    public function filmValidatorAction(ValidatorInterface $validator): Response
+    {
+        $film = new Film();
+        $film
+            ->setTitre(str_repeat('abc', 100))      // trop de caractères
+            ->setAnnee(1849)                        // année trop petite
+            ->setEnstock(true)
+            ->setPrix(0.99)                         // prix trop faible
+            ->setQuantite(-15)                      // incohérent avec enstock (callback), quantité négative
+        ;
+        dump($validator->validate($film));
+        return new Response('<body>cf. dump</body>');
     }
 }

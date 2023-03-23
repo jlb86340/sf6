@@ -80,10 +80,11 @@ class FormController extends AbstractController
             ->setTitre(str_repeat('abc', 100))      // trop de caractères
             ->setAnnee(1849)                        // année trop petite
             ->setEnstock(true)
-            ->setPrix(0.99)                             // prix trop faible
+            ->setPrix(0.99)                         // prix trop faible
             ->setQuantite(-15)                      // incohérent avec enstock (callback), quantité négative
         ;
         dump($validator->validate($film));
         return new Response('<body>cf. dump</body>');
     }
 }
+

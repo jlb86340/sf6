@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: 'ts_magasins')]
 #[ORM\Entity(repositoryClass: MagasinRepository::class)]
@@ -18,9 +19,15 @@ class Magasin
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'La taille du nom est trop grande ; la limite est {{ limit }}',
+    )]
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'magasin', targetEntity: ProduitMagasin::class)]
+    #[Assert\Valid]
     private Collection $produitMagasins;
 
 

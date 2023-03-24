@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Produit;
+use App\Entity\ProduitMagasin;
+use App\Form\ProduitMagasinType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -112,10 +116,29 @@ class ProduitController extends AbstractController
         '/magasin/add',
         name: '_magasin_add',
     )]
-    public function magasinAddAction(): Response
+    public function magasinAddAction(EntityManagerInterface $em, Request $request): Response
     {
-        $this->addFlash('info', 'échec ajout relation produit/magasin');
-        return $this->redirectToRoute('produit_view', ['id' => 3]);
+        $produitMagasin = new ProduitMagasin();
+
+        $form = $this->createForm(ProduitMagasinType::class, $produitMagasin);
+        $form->add('send', SubmitType::class, ['label' => 'add produit/magasin']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $em->persist($produitMagasin);
+            $em->flush();
+            $this->addFlash('info', 'ajout produit/magasin réussi');
+            return $this->redirectToRoute('produit_view', ['id' => $produitMagasin->getProduit()->getId()]);
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('info', 'erreur formulaire produit/magasin');
+
+        $args = array(
+            'myform' => $form->createView(),
+        );
+        return $this->render('Produit/magasin_add.html.twig', $args);
     }
 
     /**

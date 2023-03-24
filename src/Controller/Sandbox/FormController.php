@@ -2,7 +2,9 @@
 
 namespace App\Controller\Sandbox;
 
+use App\Entity\Sandbox\Critique;
 use App\Entity\Sandbox\Film;
+use App\Form\Sandbox\CritiqueType;
 use App\Form\Sandbox\FilmType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -86,5 +88,56 @@ class FormController extends AbstractController
         dump($validator->validate($film));
         return new Response('<body>cf. dump</body>');
     }
-}
 
+    #[Route('/film/add', name: '_film_add')]
+    public function filmAddAction(EntityManagerInterface $em, Request $request): Response
+    {
+        $film = new Film();
+
+        $form = $this->createForm(FilmType::class, $film);
+        $form->add('send', SubmitType::class, ['label' => 'add film']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $em->persist($film);
+            $em->flush();
+            $this->addFlash('info', 'ajout film réussi');
+            return $this->redirectToRoute('sandbox_doctrine_critique_view2', ['id' => $film->getId()]);
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('info', 'formulaire ajout film incorrect');
+
+        $args = array(
+            'myform' => $form->createView(),
+        );
+        return $this->render('Sandbox/Form/film_add.html.twig', $args);
+    }
+
+    #[Route('/critique/add', name: '_critique_add')]
+    public function critiqueAddAction(EntityManagerInterface $em, Request $request): Response
+    {
+        $critique = new Critique();
+
+        $form = $this->createForm(CritiqueType::class, $critique);
+        $form->add('send', SubmitType::class, ['label' => 'add critique']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $em->persist($critique);
+            $em->flush();
+            $this->addFlash('info', 'ajout critique réussi');
+            return $this->redirectToRoute('sandbox_doctrine_critique_view2', ['id' => $critique->getFilm()->getId()]);
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('info', 'formulaire ajout critique incorrect');
+
+        $args = array(
+            'myform' => $form->createView(),
+        );
+        return $this->render('Sandbox/Form/critique_add.html.twig', $args);
+    }
+}

@@ -8,6 +8,7 @@ use App\Form\Sandbox\CritiqueType;
 use App\Form\Sandbox\FilmType;
 use App\Form\Sandbox\Personne;
 use App\Form\Sandbox\PersonneType;
+use App\Form\Sandbox\ProfilType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -166,5 +167,33 @@ class FormController extends AbstractController
             'myform' => $form,                 // le ->createView n'est pas nécessaire
         );
         return $this->render('Sandbox/Form/personne.html.twig', $args);
+    }
+
+    #[Route('/profil', name: '_profil')]
+    public function profilAction(Request $request)
+    {
+        $form = $this->createForm(ProfilType::class, null);
+        $form->add('send', SubmitType::class, ['label' => 'send Profil']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $this->addFlash('info', 'Profil ok');
+            $pseudo = $form->get('pseudo')->getData();
+            $refus = $form->get('refus')->getData();
+            $args = array(
+                'pseudo' => $pseudo,
+                'refus' => $refus,
+            );
+            return $this->render('Sandbox/Form/profil_result.html.twig', $args);
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('info', 'formulaire profil incorrect');
+
+        $args = array(
+            'myform' => $form,                 // le ->createView n'est pas nécessaire
+        );
+        return $this->render('Sandbox/Form/profil.html.twig', $args);
     }
 }

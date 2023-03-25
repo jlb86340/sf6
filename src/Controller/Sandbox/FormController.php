@@ -6,6 +6,8 @@ use App\Entity\Sandbox\Critique;
 use App\Entity\Sandbox\Film;
 use App\Form\Sandbox\CritiqueType;
 use App\Form\Sandbox\FilmType;
+use App\Form\Sandbox\Personne;
+use App\Form\Sandbox\PersonneType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -139,5 +141,30 @@ class FormController extends AbstractController
             'myform' => $form->createView(),
         );
         return $this->render('Sandbox/Form/critique_add.html.twig', $args);
+    }
+
+    #[Route('/personne', name: '_personne')]
+    public function personneAction(Request $request)
+    {
+        $personne = new Personne();
+
+        $form = $this->createForm(PersonneType::class, $personne);
+        $form->add('send', SubmitType::class, ['label' => 'send Personne']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $this->addFlash('info', 'Personne ok');
+            return $this->render('Sandbox/Form/personne_result.html.twig', ['personne' => $personne]);
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('info', 'formulaire personne incorrect');
+
+        $args = array(
+            'personne' => $personne,
+            'myform' => $form,                 // le ->createView n'est pas nécessaire
+        );
+        return $this->render('Sandbox/Form/personne.html.twig', $args);
     }
 }

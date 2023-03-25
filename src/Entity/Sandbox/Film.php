@@ -28,7 +28,7 @@ class Film
 
     #[ORM\Column(options: ['comment' => 'année de sortie'])]
     // le paramètre "name" n'est pas précisé, le nom du champ sera celui du membre : "annee"
-        // le paramètre "type" n'est pas précisé, ce sera celui correspondant à 'int' : "integer"
+    // le paramètre "type" n'est pas précisé, ce sera celui correspondant à 'int' : "integer"
     #[Assert\Range(
         minMessage: 'Avant {{ limit }} le cinéma n\'existait pas',
         min: 1850,
@@ -41,7 +41,7 @@ class Film
 
     #[ORM\Column(name: 'enstock', type: 'boolean', options: ['default' => true])]
     // paramètre "name" inutile ici car c'est déjà la valeur par défaut (c'est pour l'exemple)
-        // idem pour le paramètre "type"
+    // idem pour le paramètre "type"
     #[Assert\Type(
         type: 'boolean',
         message: '{{ value }} n\'est pas de type {{ type }}',
@@ -187,4 +187,3 @@ class Film
         }
     }
 }
-

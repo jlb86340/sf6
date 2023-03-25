@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Pays;
 use App\Entity\Produit;
 use App\Entity\ProduitMagasin;
 use App\Form\ProduitMagasinType;
+use App\Form\ProduitPaysType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -106,10 +109,39 @@ class ProduitController extends AbstractController
         '/pays/add',
         name: '_pays_add',
     )]
-    public function paysAddAction(): Response
+    public function paysAddAction(EntityManagerInterface $em, Request $request): Response
     {
-        $this->addFlash('info', 'échec ajout relation produit/pays');
-        return $this->redirectToRoute('produit_view', ['id' => 3]);
+        $form = $this->createForm(ProduitPaysType::class);
+        $form->add('send', SubmitType::class, ['label' => 'add produit/pays']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+             /* @var Produit $produit */
+             /* @var Pays $pays */
+            $produit = $form->get('produit')->getData();
+            $pays = $form->get('pays')->getData();
+            if (! $produit->getPayss()->contains($pays))
+            {
+                //$produit->addPays($pays);             // ne met pas à jour l'objet $pays
+                $pays->addProduit($produit);            // met à jour les deux entités
+                $em->flush();
+                $this->addFlash('info', 'ajout produit/pays réussi');
+                return $this->redirectToRoute('produit_view', ['id' => $produit->getId()]);
+            }
+        }
+
+        if ($form->isSubmitted())
+        {
+            $this->addFlash('info', 'erreur formulaire produit/pays');
+            if ($form->isValid())
+                $form->addError(new FormError('l\'association existe déjà'));
+        }
+
+        $args = array(
+            'myform' => $form->createView(),
+        );
+        return $this->render('Produit/pays_add.html.twig', $args);
     }
 
     #[Route(

@@ -6,12 +6,14 @@ use App\Entity\Sandbox\Critique;
 use App\Entity\Sandbox\Film;
 use App\Form\Sandbox\CritiqueType;
 use App\Form\Sandbox\FilmType;
+use App\Form\Sandbox\NoteType;
 use App\Form\Sandbox\Personne;
 use App\Form\Sandbox\PersonneType;
 use App\Form\Sandbox\ProfilType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -195,5 +197,42 @@ class FormController extends AbstractController
             'myform' => $form,                 // le ->createView n'est pas nécessaire
         );
         return $this->render('Sandbox/Form/profil.html.twig', $args);
+    }
+
+    #[Route(
+        '/note/{max}',
+        name: '_note',
+        requirements: ['max' => '[1-9]\d*'],
+        defaults: ['max' => 20],
+    )]
+    public function noteAction(int $max, Request $request)
+    {
+        $form = $this->createForm(NoteType::class, null, ['data' => ['max' => $max]]);
+        $form->add('send', SubmitType::class, ['label' => 'send note']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && (! is_null($form->get('note')->getData())))
+        {
+            $this->addFlash('info', 'note ok');
+            $etudiant = $form->get('etudiant')->getData();
+            $note = $form->get('note')->getData();
+            $args = array(
+                'etudiant' => $etudiant,
+                'note' => $note,
+            );
+            return $this->render('Sandbox/Form/note_result.html.twig', $args);
+        }
+
+        if ($form->isSubmitted()) {
+            $this->addFlash('info', 'formulaire note incorrect');
+            // gestion basique de l'erreur personnalisée
+            if ($form->isValid() && is_null($form->get('note')->getData()))     // 2me partie du test inutile
+                $form->addError(new FormError('choix incorrect pour la note'));
+        }
+
+        $args = array(
+            'myform' => $form,                 // le ->createView n'est pas nécessaire
+        );
+        return $this->render('Sandbox/Form/note.html.twig', $args);
     }
 }
